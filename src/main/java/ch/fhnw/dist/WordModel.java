@@ -3,13 +3,9 @@ package ch.fhnw.dist;
 public class WordModel
 {
     private String Word;
-
     private int SpamAmount;
-
     private double SpamProbability;
-
     private int HamAmount;
-
     private double HamProbability;
 
     public String getWord() {
