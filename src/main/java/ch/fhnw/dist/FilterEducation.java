@@ -1,48 +1,42 @@
 package ch.fhnw.dist;
 
 import java.io.File;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 class FilterEducation {
-    final static private String DEFAULT_TEMP_DIR = "C:/Temp"; // without final slash
-    final static private double PROBABILITY_ON_ZEROMAILS = 0.001;
-    final static private ClassLoader INTERNAL_FILE_PATH = BayesSpamFilter.class.getClassLoader();
     private HashMap<String, WordModel> resultsNumMails;
 
-    void educateFilter() {
+    HashMap<String, WordModel> educateFilter() throws IOException {
         FileHelper fh = new FileHelper();
 
-        String zipHAM = Objects.requireNonNull(INTERNAL_FILE_PATH.getResource("ham-anlern.zip")).getPath();
-        String zipSPAM = Objects.requireNonNull(INTERNAL_FILE_PATH.getResource("spam-anlern.zip")).getPath();
-        String zipFileTest = Objects.requireNonNull(INTERNAL_FILE_PATH.getResource("ham-test.zip")).getPath();
+        String zipHAM = "ham-anlern.zip";
+        String zipSPAM = "spam-anlern.zip";
 
-        String tempDirHAM = DEFAULT_TEMP_DIR + "/ham-anlern";
-        String tempDirSPAM = DEFAULT_TEMP_DIR + "/spam-anlern";
+        String tempDirHAM = CONFIG.DEFAULT_TEMP_DIR + "/ham-anlern";
+        String tempDirSPAM = CONFIG.DEFAULT_TEMP_DIR + "/spam-anlern";
         ArrayList<String> resultsHAM = new ArrayList<>();
         ArrayList<String> resultsSPAM = new ArrayList<>();
 
         File fileHAM = new File(tempDirHAM);
         File fileSPAM = new File(tempDirSPAM);
 
-        int countHAMmails = 1;
-        int countSPAMmails = 1;
+        int countHAMmails;
+        int countSPAMmails;
 
-        try {
+        fh.unzip(zipHAM, tempDirHAM);
+        fh.unzip(zipSPAM, tempDirSPAM);
 
-            fh.unzip(zipHAM, tempDirHAM);
-            fh.unzip(zipSPAM, tempDirSPAM);
+        countHAMmails = Objects.requireNonNull(fileHAM.listFiles()).length;
+        countSPAMmails = Objects.requireNonNull(fileSPAM.listFiles()).length;
 
-            countHAMmails = Objects.requireNonNull(fileHAM.listFiles()).length;
-            countSPAMmails = Objects.requireNonNull(fileSPAM.listFiles()).length;
-
-            for (File file : fh.getAllFilesFromDirectory(fileHAM)) {
-                resultsHAM.addAll(fh.readFileContentToList(file, true));
-            }
-            for (File file : fh.getAllFilesFromDirectory(fileSPAM)) {
-                resultsSPAM.addAll(fh.readFileContentToList(file, true));
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        for (File file : fh.getAllFilesFromDirectory(fileHAM)) {
+            resultsHAM.addAll(fh.readFileContentToList(file, true));
+        }
+        for (File file : fh.getAllFilesFromDirectory(fileSPAM)) {
+            resultsSPAM.addAll(fh.readFileContentToList(file, true));
         }
 
 
@@ -55,16 +49,12 @@ class FilterEducation {
             else resultsNumMails.put(s, wordModel);
         });
 
-        /*resultsHAMNumMails.forEach((s, wordModel) -> System.out.println(s + " : " + wordModel.getHamAmount()));
-        System.out.println("-------------");
-        resultsSPAMNumMails.forEach((s, wordModel) -> System.out.println(s + " : " + wordModel.getHamAmount()));*/
-
         int finalCountHAMmails = countHAMmails;
         int finalCountSPAMmails = countSPAMmails;
         resultsNumMails.forEach((s, wordModel) -> {
             wordModel.setHamProbability((double) wordModel.getHamAmount() / finalCountHAMmails * 100);
             wordModel.setSpamProbability((double) wordModel.getSpamAmount() / finalCountSPAMmails * 100);
-            if (wordModel.getSpamProbability() == 0.0) wordModel.setSpamProbability(PROBABILITY_ON_ZEROMAILS);
+            if (wordModel.getSpamProbability() == 0.0) wordModel.setSpamProbability(CONFIG.PROBABILITY_ON_ZEROMAILS);
         });
 
         /*try{
@@ -78,9 +68,7 @@ class FilterEducation {
         }catch (Exception e){
 
         }*/
-    }
 
-    HashMap<String, WordModel> getWords() {
         return resultsNumMails;
     }
 

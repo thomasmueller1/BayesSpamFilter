@@ -4,22 +4,22 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class FileHelper {
-
+class FileHelper {
     private static final int BUFFER_SIZE = 4096;
+    private static final ClassLoader INTERNAL_FILE_PATH = BayesSpamFilter.class.getClassLoader();
 
-
-    public ArrayList<String> readFileContentToList(File file, Boolean SelectDistinct) throws IOException {
+    ArrayList<String> readFileContentToList(File file, Boolean SelectDistinct) throws IOException {
         ArrayList<String> lst = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String strLine;
             while ((strLine = br.readLine()) != null) {
                 String[] wordSplitted = strLine.split(" ");
-                Arrays.asList(wordSplitted).stream().filter(s -> !s.isEmpty()).forEach(s -> lst.add(formatWord(s)));
+                Arrays.stream(wordSplitted).filter(s -> !s.isEmpty()).forEach(s -> lst.add(formatWord(s)));
             }
         }
         if (SelectDistinct) {
@@ -32,7 +32,7 @@ public class FileHelper {
         return word.toUpperCase().trim();
     }
 
-    public ArrayList<File> getAllFilesFromDirectory(File folder) {
+    ArrayList<File> getAllFilesFromDirectory(File folder) {
         ArrayList<File> files = new ArrayList<>();
         File[] fileNames = folder.listFiles();
         if (fileNames == null) return files;
@@ -47,7 +47,7 @@ public class FileHelper {
         return files;
     }
 
-    public HashMap<String, WordModel> createHashMapFromWords(ArrayList<String> results, Boolean isSpam) {
+    HashMap<String, WordModel> createHashMapFromWords(ArrayList<String> results, Boolean isSpam) {
         HashMap<String, WordModel> wordModels = new HashMap<>();
 
         for (String word : results) {
@@ -64,7 +64,9 @@ public class FileHelper {
         return wordModels;
     }
 
-    public void unzip(String zipFilePath, String destDirectory) throws IOException {
+    void unzip(String zipFilePath, String destDirectory) throws IOException {
+        zipFilePath = Objects.requireNonNull(INTERNAL_FILE_PATH.getResource(zipFilePath)).getPath();
+
         File destDir = new File(destDirectory);
         if (!destDir.exists()) {
             destDir.mkdir();
@@ -91,7 +93,7 @@ public class FileHelper {
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[BUFFER_SIZE];
-        int read = 0;
+        int read;
         while ((read = zipIn.read(bytesIn)) != -1) {
             bos.write(bytesIn, 0, read);
         }
