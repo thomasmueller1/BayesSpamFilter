@@ -33,7 +33,6 @@ public class WordModel
         SpamAmount++;
     }
 
-
     public double getSpamProbability() {
         return SpamProbability;
     }
