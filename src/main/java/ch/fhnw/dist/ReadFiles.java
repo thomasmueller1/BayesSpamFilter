@@ -32,20 +32,6 @@ public class ReadFiles {
             //}
         }
 
-        for(File file : fileNames){
-            // if directory call the same method again
-            /*if(file.isDirectory()){
-                listAllFiles(file);
-            } else{*/
-            try {
-                readContent(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            //}
-        }
-
         wordModels.forEach((s, wordModel) -> {
             double wordModelsSize = (double)wordModels.size()/100;
             wordModel.setHamProbability(wordModel.getHamAmount()/wordModelsSize);
