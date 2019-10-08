@@ -15,20 +15,35 @@ public class ReadFiles {
 
     }
 
-    public void listAllFiles(File folder){
-        File[] fileNames = folder.listFiles();
+    public void listAllFiles(File folder1, File folder2){
+        File[] fileNames = folder1.listFiles();
+
         for(File file : fileNames){
             // if directory call the same method again
-            if(file.isDirectory()){
+            /*if(file.isDirectory()){
                 listAllFiles(file);
-            } else{
-                try {
-                    readContent(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+            } else{*/
+            try {
+                readContent(file);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            //}
+        }
+
+        for(File file : fileNames){
+            // if directory call the same method again
+            /*if(file.isDirectory()){
+                listAllFiles(file);
+            } else{*/
+            try {
+                readContent(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            //}
         }
 
         wordModels.forEach((s, wordModel) -> {
@@ -38,7 +53,8 @@ public class ReadFiles {
         });
 
         wordModels.forEach((s, wordModel) -> {
-            if(wordModel.getHamProbability() > 1) System.out.println(s + " ::::: " + wordModel.getHamProbability());
+            if(wordModel.getHamProbability() > 0) System.out.println(s + " ::|:: " + wordModel.getHamProbability());
+            //if(s.equalsIgnoreCase("THE")) System.out.println(s + " ::::: " + wordModel.getHamProbability());
         });
     }
 
@@ -53,13 +69,20 @@ public class ReadFiles {
             // Read lines from the file, returns null when end of stream is reached
             while((strLine = br.readLine()) != null){
                 String[] wordSplitted = strLine.split(" ");
-                wordList.addAll(Arrays.stream(wordSplitted).map(s -> s.toUpperCase().trim()).filter(s -> !s.isEmpty()).collect(Collectors.toList()));
+                List<String> wordSplittedClean = Arrays.stream(wordSplitted).map(s -> s.toUpperCase().trim()).filter(s -> !s.isEmpty()).collect(Collectors.toList());
+                wordList.addAll(wordSplittedClean);
             }
 
             for (String word : wordList){
-                //System.out.println(word);
-                if(!wordModels.containsKey(word)) wordModels.put(word, new WordModel(isSpam));
-                else wordModels.get(word).incAmount(isSpam);
+                if(word.equalsIgnoreCase("THE")) {
+                    //System.out.println(word);
+                    if (!wordModels.containsKey(word)){
+                        System.out.println("NEW ENTRY FOR " + word);
+                        wordModels.put(word, new WordModel(isSpam));
+                    } else {
+                        wordModels.get(word).incAmount(isSpam);
+                    }
+                }
             }
         }
     }
