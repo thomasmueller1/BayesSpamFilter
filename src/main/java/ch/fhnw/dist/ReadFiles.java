@@ -8,7 +8,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReadFiles {
-    HashMap<String, WordModel> wordModels = new HashMap<>();
+    public HashMap<String, WordModel> getWordModels() {
+        return wordModels;
+    }
+
+    public void setWordModels(HashMap<String, WordModel> wordModels) {
+        this.wordModels = wordModels;
+    }
+
+    private HashMap<String, WordModel> wordModels = new HashMap<>();
     boolean isSpam;
 
     public ReadFiles() {
