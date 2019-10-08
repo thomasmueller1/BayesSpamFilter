@@ -2,15 +2,15 @@ package ch.fhnw.dist;
 
 public class WordModel
 {
-    public String Word;
+    private String Word;
 
-    public int SpamAmount;
+    private int SpamAmount;
 
-    public double SpamProbability;
+    private double SpamProbability;
 
-    public int HamAmount;
+    private int HamAmount;
 
-    public double HamProbability;
+    private double HamProbability;
 
     public String getWord() {
         return Word;
