@@ -3,6 +3,7 @@ package ch.fhnw.dist;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -44,6 +45,23 @@ public class FileHelper {
             }
         }
         return files;
+    }
+
+    public HashMap<String, WordModel> createHashMapFromWords(ArrayList<String> results, Boolean isSpam) {
+        HashMap<String, WordModel> wordModels = new HashMap<>();
+
+        for (String word : results) {
+            if (wordModels.containsKey(word)) {
+                if (isSpam) {
+                    wordModels.get(word).incSpamAmount();
+                } else {
+                    wordModels.get(word).incHamAmount();
+                }
+            } else {
+                wordModels.put(word, new WordModel(isSpam));
+            }
+        }
+        return wordModels;
     }
 
     public void unzip(String zipFilePath, String destDirectory) throws IOException {
