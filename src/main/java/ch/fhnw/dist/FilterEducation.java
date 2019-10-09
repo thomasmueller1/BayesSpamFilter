@@ -23,14 +23,11 @@ class FilterEducation {
         File fileHAM = new File(tempDirHAM);
         File fileSPAM = new File(tempDirSPAM);
 
-        int countHAMmails;
-        int countSPAMmails;
-
         fh.unzip(zipHAM, tempDirHAM);
         fh.unzip(zipSPAM, tempDirSPAM);
 
-        countHAMmails = Objects.requireNonNull(fileHAM.listFiles()).length;
-        countSPAMmails = Objects.requireNonNull(fileSPAM.listFiles()).length;
+        final int countHAMmails = Objects.requireNonNull(fileHAM.listFiles()).length;
+        final int countSPAMmails = Objects.requireNonNull(fileSPAM.listFiles()).length;
 
         for (File file : fh.getAllFilesFromDirectory(fileHAM)) {
             resultsHAM.addAll(fh.readFileContentToList(file, true));
@@ -48,13 +45,17 @@ class FilterEducation {
             else resultsNumMails.put(s, wordModel);
         });
 
-        int finalCountHAMmails = countHAMmails;
-        int finalCountSPAMmails = countSPAMmails;
         resultsNumMails.forEach((s, wordModel) -> {
-            wordModel.setHamProbability((double) wordModel.getHamAmount() / finalCountHAMmails);
-            wordModel.setSpamProbability((double) wordModel.getSpamAmount() / finalCountSPAMmails);
-            if (wordModel.getHamProbability() == 0.0) wordModel.setHamProbability(CONFIG.PROBABILITY_ON_ZEROMAILS);
-            if (wordModel.getSpamProbability() == 0.0) wordModel.setSpamProbability(CONFIG.PROBABILITY_ON_ZEROMAILS);
+            double hamProbability = CONFIG.PROBABILITY_ON_ZEROMAILS;
+            if(wordModel.getHamAmount() > 0)
+                hamProbability = (double)wordModel.getHamAmount() / countHAMmails;
+
+            double spamProbability = CONFIG.PROBABILITY_ON_ZEROMAILS;
+            if(wordModel.getSpamAmount() > 0)
+                spamProbability = (double)wordModel.getSpamAmount() / countSPAMmails;
+
+            wordModel.setHamProbability(hamProbability);
+            wordModel.setSpamProbability(spamProbability);
         });
 
         return resultsNumMails;

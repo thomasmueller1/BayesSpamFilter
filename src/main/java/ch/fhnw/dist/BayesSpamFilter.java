@@ -1,9 +1,11 @@
 package ch.fhnw.dist;
 
+import jdk.internal.net.http.common.Pair;
+import jdk.javadoc.internal.doclets.toolkit.taglets.SeeTaglet;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 public class BayesSpamFilter {
 
@@ -33,9 +35,11 @@ public class BayesSpamFilter {
             for (File file : files) {
                 wordsInMail = fh.readFileContentToList(file, false);
                 //System.out.println(file.getName() + " (" + wordsInMail.size() + " words)");
-
-                if(calcPajassAlgo(wordsInMail, wordList) > threshold) countSPAM++;
+                double result = calcPajassAlgo(wordsInMail, wordList);
+                if(result > threshold) countSPAM++;
                 else countHAM++;
+
+                System.out.println(result);
             }
 
             System.out.println("Threshold: " + threshold + "  |  HAM: " + countHAM + "  |  SPAM: " + countSPAM);
@@ -48,15 +52,41 @@ public class BayesSpamFilter {
         double hamProbability  = 1.0d;
         double spamProbability = 1.0d;
 
+        // Liste mit den 10 signifikantesten Wörtern (Das heisst, die wörter die am stärksten spam oder ham signalisieren)
+        HashMap<String, Double> wordSignificances = new HashMap<>();
+
         for (String word: wordsInMail) {
             if(wordList.containsKey(word)) {
-                hamProbability *= wordList.get(word).getHamProbability();
-                spamProbability *= wordList.get(word).getSpamProbability();
+                WordModel wordModel = wordList.get(word);
 
-                //System.out.println("multiply " + wordList.get(word).getSpamProbability());
+                double significance = 0;
+                if(wordModel.getHamProbability() > wordModel.getSpamProbability()) {
+                    significance = wordModel.getHamProbability() / wordModel.getSpamProbability();
+                } else {
+                    significance = wordModel.getSpamProbability() / wordModel.getHamProbability();
+                }
+
+                if(wordSignificances.size() < 9) {
+                    wordSignificances.put(word, significance);
+                    continue;
+                }
+
+                Optional<Map.Entry<String,Double>> minValue = wordSignificances.entrySet().stream().min((o1, o2) -> Double.compare(o1.getValue(), o2.getValue()));
+                if(!minValue.isPresent())
+                    continue;
+
+                Map.Entry<String,Double> minEntry = minValue.get();
+                if(minEntry.getValue() < significance) {
+                    wordSignificances.remove(minEntry.getKey());
+                    wordSignificances.put(word, significance);
+                }
             }
         }
 
+        for (String word : wordSignificances.keySet()) {
+            hamProbability *= wordList.get(word).getHamProbability();
+            spamProbability *= wordList.get(word).getSpamProbability();
+        }
 
         double probOfSpam = spamProbability / (spamProbability + hamProbability); // 1 = 100% Spam
 
