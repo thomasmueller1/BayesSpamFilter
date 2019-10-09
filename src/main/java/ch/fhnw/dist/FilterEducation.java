@@ -39,50 +39,25 @@ class FilterEducation {
             resultsSPAM.addAll(fh.readFileContentToList(file, true));
         }
 
-
         HashMap<String, WordModel> resultsHAMNumMails = fh.createHashMapFromWords(resultsHAM, false);
         HashMap<String, WordModel> resultsSPAMNumMails = fh.createHashMapFromWords(resultsSPAM, true);
 
         resultsNumMails = resultsHAMNumMails;
         resultsSPAMNumMails.forEach((s, wordModel) -> {
-            if (resultsNumMails.containsKey(s)) resultsNumMails.get(s).incSpamAmount();
+            if (resultsNumMails.containsKey(s)) resultsNumMails.get(s).setSpamAmount(wordModel.getSpamAmount());
             else resultsNumMails.put(s, wordModel);
         });
 
         int finalCountHAMmails = countHAMmails;
         int finalCountSPAMmails = countSPAMmails;
         resultsNumMails.forEach((s, wordModel) -> {
-            wordModel.setHamProbability((double) wordModel.getHamAmount() / finalCountHAMmails * 100);
-            wordModel.setSpamProbability((double) wordModel.getSpamAmount() / finalCountSPAMmails * 100);
+            wordModel.setHamProbability((double) wordModel.getHamAmount() / finalCountHAMmails);
+            wordModel.setSpamProbability((double) wordModel.getSpamAmount() / finalCountSPAMmails);
+            if (wordModel.getHamProbability() == 0.0) wordModel.setHamProbability(CONFIG.PROBABILITY_ON_ZEROMAILS);
             if (wordModel.getSpamProbability() == 0.0) wordModel.setSpamProbability(CONFIG.PROBABILITY_ON_ZEROMAILS);
         });
 
-        /*try{
-            fh.unzip(zipFileTest, DEFAULT_TEMP_DIR+"/test");
-            list = fh.createHashMapFromWords(results, false);
-            ArrayList<File> mails =  fh.getAllFilesFromDirectory(new File(DEFAULT_TEMP_DIR+"/test"));
-            ArrayList<String> firstMailWords = fh.readFileContentToList(mails.get(0),false);
-            for (String mailWord : firstMailWords){
-                System.out.println(mailWord + " "+ calcPajassAlgo(firstMailWords,list));
-            }
-        }catch (Exception e){
-
-        }*/
-
         return resultsNumMails;
-    }
-
-    private static double calcPajassAlgo(ArrayList<String> wordsFormMail, HashMap<String, WordModel> validationList) {
-        double spamProduct = 0;
-        double hamProduct = 0;
-
-        for (String word : wordsFormMail) {
-            if (validationList.containsKey(word)) {
-                spamProduct *= validationList.get(word).getSpamProbability();
-                hamProduct *= validationList.get(word).getHamProbability();
-            }
-        }
-        return spamProduct / (spamProduct + hamProduct);
     }
 }
 
