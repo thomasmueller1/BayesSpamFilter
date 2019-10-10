@@ -1,8 +1,5 @@
 package ch.fhnw.dist;
 
-import jdk.internal.net.http.common.Pair;
-import jdk.javadoc.internal.doclets.toolkit.taglets.SeeTaglet;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -12,43 +9,35 @@ public class BayesSpamFilter {
     public static void main(String[] args) throws IOException {
         FilterEducation trainer = new FilterEducation();
         HashMap<String, WordModel> wordList = trainer.educateFilter();
-        //Map<String, WordModel> wordListFiltered = wordList.entrySet().stream().filter(w -> w.getValue().getHamProbability() > .8 || w.getValue().getSpamProbability() > .8).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
 
         FileHelper fh = new FileHelper();
 
-        /*wordList.forEach((s, wordModel) -> {
-            System.out.println(s + ": " + wordModel.getHamAmount() + " (" + wordModel.getHamProbability() + "%)  |  " + wordModel.getSpamAmount() + " (" + wordModel.getSpamProbability()+"%)");
-        });*/
-
-        String zipMAILS = CONFIG.MAILS_TO_TEST_ZIP + ".zip";
-        String tempDir = CONFIG.DEFAULT_TEMP_DIR + "/" + CONFIG.MAILS_TO_TEST_ZIP;
+        String zipMAILS = CONFIG.HAM_MAILS_TO_TEST_ZIP + ".zip";
+        String tempDir = CONFIG.DEFAULT_TEMP_DIR + "/" + CONFIG.HAM_MAILS_TO_TEST_ZIP;
         ArrayList<String> wordsInMail;
 
         File fileMAILS = new File(tempDir);
-        //fh.unzip(zipMAILS, tempDir);
+        fh.unzip(zipMAILS, tempDir);
         ArrayList<File> files = fh.getAllFilesFromDirectory(fileMAILS);
 
         int countHAM = 0;
         int countSPAM = 0;
-        double threshold = 0.6;
 
             for (File file : files) {
                 wordsInMail = fh.readFileContentToList(file, false);
                 //System.out.println(file.getName() + " (" + wordsInMail.size() + " words)");
                 double result = calcPajassAlgo(wordsInMail, wordList);
-                if(result > threshold) countSPAM++;
+                if(result > CONFIG.SPAM_THRESHOLD) countSPAM++;
                 else countHAM++;
 
                 System.out.println(result);
             }
 
-            System.out.println("Threshold: " + threshold + "  |  HAM: " + countHAM + "  |  SPAM: " + countSPAM);
+            System.out.println("Threshold: " + CONFIG.SPAM_THRESHOLD + "  |  HAM: " + countHAM + "  |  SPAM: " + countSPAM);
 
     }
 
     private static double calcPajassAlgo(ArrayList<String> wordsInMail, HashMap<String, WordModel> wordList) {
-        /* TODO: Thomas prüfen-> Richtig so??? */
-
         double hamProbability  = 1.0d;
         double spamProbability = 1.0d;
 
@@ -71,7 +60,7 @@ public class BayesSpamFilter {
                     continue;
                 }
 
-                Optional<Map.Entry<String,Double>> minValue = wordSignificances.entrySet().stream().min((o1, o2) -> Double.compare(o1.getValue(), o2.getValue()));
+                Optional<Map.Entry<String,Double>> minValue = wordSignificances.entrySet().stream().min(Comparator.comparingDouble(Map.Entry::getValue));
                 if(!minValue.isPresent())
                     continue;
 
@@ -90,12 +79,6 @@ public class BayesSpamFilter {
 
         double probOfSpam = spamProbability / (spamProbability + hamProbability); // 1 = 100% Spam
 
-        //probOfSpam = isNaN(probOfSpam) ? 1.0 : probOfSpam;
-
-        /*System.out.println("hamProbability: " + hamProbability);
-        System.out.println("spamProbability: " + spamProbability);*/
-        //System.out.println("probOfSpam: " + probOfSpam);
-        //System.out.println("-----------------------");
         return probOfSpam;
     }
 
