@@ -50,14 +50,10 @@ class FileHelper {
     HashMap<String, WordModel> createHashMapFromWords(ArrayList<String> results, Boolean isSpam) {
         HashMap<String, WordModel> wordModels = new HashMap<>();
 
-        for (String word : results) {
-            if (wordModels.containsKey(word)) {
-                if (isSpam) {
-                    wordModels.get(word).incSpamAmount();
-                } else {
-                    wordModels.get(word).incHamAmount();
-                }
-            } else {
+        for(String word : results) {
+            if(wordModels.containsKey(word)) {
+                wordModels.get(word).incAmount(isSpam);
+            } else{
                 wordModels.put(word, new WordModel(isSpam));
             }
         }

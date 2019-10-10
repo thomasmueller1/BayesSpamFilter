@@ -2,23 +2,19 @@ package ch.fhnw.dist;
 
 class WordModel
 {
-    private String Word;
-    private int SpamAmount = 0;
+    private int    SpamAmount = 0;
     private double SpamProbability;
-    private int HamAmount = 0;
+    private int    HamAmount = 0;
     private double HamProbability;
 
-    WordModel(boolean spam) {
-        if(spam) SpamAmount = 1;
+    WordModel(boolean isSpam) {
+        if(isSpam) SpamAmount = 1;
         else HamAmount = 1;
     }
 
-    String getWord() {
-        return Word;
-    }
-
-    void setWord(String word) {
-        Word = word;
+    void incAmount(boolean isSpam) {
+        if(isSpam) incSpamAmount();
+        else incHamAmount();
     }
 
     int getSpamAmount() {
@@ -51,11 +47,6 @@ class WordModel
 
     void incHamAmount() {
         HamAmount++;
-    }
-
-    void incAmount(boolean isSpam) {
-        if(isSpam) incSpamAmount();
-        else incHamAmount();
     }
 
     double getHamProbability() {
