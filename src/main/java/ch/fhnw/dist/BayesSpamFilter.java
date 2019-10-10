@@ -1,6 +1,5 @@
 package ch.fhnw.dist;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -11,78 +10,29 @@ import java.util.*;
 public class BayesSpamFilter {
 
     public static void main(String[] args) throws IOException {
-        FilterEducation trainer = new FilterEducation();
-        HashMap<String, WordModel> wordList = trainer.educateFilter();
+        FilterHelper filter = new FilterHelper();
+        HashMap<String, WordModel> wordList  = filter.educateFilter(); // Filter trainieren
+        HashMap<String, Integer> resultsHam  = filter.determineSpamProbability(wordList, CONFIG.HAM_MAILS_TO_TEST_ZIP); // Spamwahrscheinlichkeit in Ham Testmails
+        HashMap<String, Integer> resultsSpam = filter.determineSpamProbability(wordList, CONFIG.SPAM_MAILS_TO_TEST_ZIP); // Spamwahrscheinlichkeit in Spam Testmails
 
-        FileHelper fh = new FileHelper();
+        /* Allgemeine Infos ausgeben */
+        System.out.println("Schwellwert: " + CONFIG.SPAM_THRESHOLD);
+        System.out.println("Alpha Wert:  " + CONFIG.PROBABILITY_ON_ZEROMAILS + "\n");
 
-        String zipMAILS = CONFIG.HAM_MAILS_TO_TEST_ZIP + ".zip";
-        String tempDir = CONFIG.DEFAULT_TEMP_DIR + "/" + CONFIG.HAM_MAILS_TO_TEST_ZIP;
-        ArrayList<String> wordsInMail;
-
-        File fileMAILS = new File(tempDir);
-        fh.unzip(zipMAILS, tempDir);
-        ArrayList<File> files = fh.getAllFilesFromDirectory(fileMAILS);
-
-        int countHAM = 0;
-        int countSPAM = 0;
-
-            for (File file : files) {
-                wordsInMail = fh.readFileContentToList(file, false);
-                double result = calcBayesAlgo(wordsInMail, wordList);
-                if(result > CONFIG.SPAM_THRESHOLD) countSPAM++;
-                else countHAM++;
-
-                System.out.println(result);
-            }
-
-            System.out.println("Threshold: " + CONFIG.SPAM_THRESHOLD + "  |  HAM: " + countHAM + "  |  SPAM: " + countSPAM);
-
+        /* Resultate ausgeben */
+        System.out.println("HAM Testmails Erkennungsraten:");
+        showResults(resultsHam);
+        System.out.println("\nSPAM Testmails Erkennungsraten:");
+        showResults(resultsSpam);
     }
 
-    private static double calcBayesAlgo(ArrayList<String> wordsInMail, HashMap<String, WordModel> wordList) {
-        double hamProbability  = 1.0d;
-        double spamProbability = 1.0d;
+    private static void showResults(HashMap<String, Integer> results) {
+        int ham = results.get("ham"), spam = results.get("spam");
+        double total = results.get("ham") + results.get("spam");
 
-        // Liste mit den 10 signifikantesten Wörtern (Das heisst, die Wörter die am stärksten Spam oder Ham signalisieren)
-        HashMap<String, Double> wordSignificances = new HashMap<>();
-
-        for (String word: wordsInMail) {
-            if(wordList.containsKey(word)) {
-                WordModel wordModel = wordList.get(word);
-
-                double significance = 0;
-                if(wordModel.getHamProbability() > wordModel.getSpamProbability()) {
-                    significance = wordModel.getHamProbability() / wordModel.getSpamProbability();
-                } else {
-                    significance = wordModel.getSpamProbability() / wordModel.getHamProbability();
-                }
-
-                if(wordSignificances.size() < 9) {
-                    wordSignificances.put(word, significance);
-                    continue;
-                }
-
-                Optional<Map.Entry<String,Double>> minValue = wordSignificances.entrySet().stream().min(Comparator.comparingDouble(Map.Entry::getValue));
-                if(!minValue.isPresent())
-                    continue;
-
-                Map.Entry<String,Double> minEntry = minValue.get();
-                if(minEntry.getValue() < significance) {
-                    wordSignificances.remove(minEntry.getKey());
-                    wordSignificances.put(word, significance);
-                }
-            }
-        }
-
-        for (String word : wordSignificances.keySet()) {
-            hamProbability *= wordList.get(word).getHamProbability();
-            spamProbability *= wordList.get(word).getSpamProbability();
-        }
-
-        double probOfSpam = spamProbability / (spamProbability + hamProbability); // 1 = 100% Spam
-
-        return probOfSpam;
+        System.out.printf("Ham:  %s%% (%d)%n", Math.round(ham/total*100*100.0)/100.0, ham);
+        System.out.printf("Spam: %s%% (%d)%n", Math.round(spam/total*100*100.0)/100.0, spam);
     }
+
 
 }
