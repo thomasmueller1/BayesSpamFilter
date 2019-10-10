@@ -17,6 +17,9 @@ class FileHelper {
     private static final int BUFFER_SIZE = 4096;
     private static final ClassLoader INTERNAL_FILE_PATH = BayesSpamFilter.class.getClassLoader();
 
+    /**
+     * Findet alle (durch Leerzeichen getrennte) Wörter in einem Mail
+     */
     ArrayList<String> readFileContentToList(File file, Boolean SelectDistinct) throws IOException {
         ArrayList<String> lst = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -36,12 +39,15 @@ class FileHelper {
         return word.toUpperCase().trim();
     }
 
+    /**
+     * Alle Datein aus dem Ordner auslesen
+     */
     ArrayList<File> getAllFilesFromDirectory(File folder) {
         ArrayList<File> files = new ArrayList<>();
         File[] fileNames = folder.listFiles();
         if (fileNames == null) return files;
         for (File file : fileNames) {
-            // if directory call the same method again
+            // Wenn es ein Ordner ist, dieselbe Methode nochmals aufrufen
             if (file.isDirectory()) {
                 files.addAll(getAllFilesFromDirectory(file));
             } else {
@@ -51,9 +57,13 @@ class FileHelper {
         return files;
     }
 
+    /**
+     * Hashmap erstellen aus den Wörtern inkl. zählen der Worte
+     */
     HashMap<String, WordModel> createHashMapFromWords(ArrayList<String> results, Boolean isSpam) {
         HashMap<String, WordModel> wordModels = new HashMap<>();
 
+        // Zähler für Ham oder Spam
         for(String word : results) {
             if(wordModels.containsKey(word)) {
                 wordModels.get(word).incAmount(isSpam);
@@ -64,6 +74,9 @@ class FileHelper {
         return wordModels;
     }
 
+    /**
+     * ZIP-File entpacken
+     */
     void unzip(String zipFilePath, String destDirectory) throws IOException {
         zipFilePath = Objects.requireNonNull(INTERNAL_FILE_PATH.getResource(zipFilePath)).getPath();
 
@@ -90,6 +103,9 @@ class FileHelper {
         zipIn.close();
     }
 
+    /**
+     * Entpackte Dateien schreiben
+     */
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
         BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
         byte[] bytesIn = new byte[BUFFER_SIZE];

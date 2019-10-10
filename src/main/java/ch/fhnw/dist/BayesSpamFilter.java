@@ -8,7 +8,6 @@ import java.util.*;
  */
 
 public class BayesSpamFilter {
-
     public static void main(String[] args) throws IOException {
         FilterHelper filter = new FilterHelper();
         HashMap<String, WordModel> wordList  = filter.educateFilter(); // Filter trainieren
@@ -26,6 +25,10 @@ public class BayesSpamFilter {
         showResults(resultsSpam);
     }
 
+
+    /**
+     * Erkennungsraten anzeigen
+     */
     private static void showResults(HashMap<String, Integer> results) {
         int ham = results.get("ham"), spam = results.get("spam");
         double total = results.get("ham") + results.get("spam");
