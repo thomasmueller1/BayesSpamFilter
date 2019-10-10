@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Helper-Klasse für das Filehandling
+ */
+
 class FileHelper {
     private static final int BUFFER_SIZE = 4096;
     private static final ClassLoader INTERNAL_FILE_PATH = BayesSpamFilter.class.getClassLoader();

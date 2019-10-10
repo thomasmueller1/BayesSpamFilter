@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Hauptklasse des Bayes Spamfilters
+ */
+
 public class BayesSpamFilter {
 
     public static void main(String[] args) throws IOException {
@@ -25,8 +29,7 @@ public class BayesSpamFilter {
 
             for (File file : files) {
                 wordsInMail = fh.readFileContentToList(file, false);
-                //System.out.println(file.getName() + " (" + wordsInMail.size() + " words)");
-                double result = calcPajassAlgo(wordsInMail, wordList);
+                double result = calcBayesAlgo(wordsInMail, wordList);
                 if(result > CONFIG.SPAM_THRESHOLD) countSPAM++;
                 else countHAM++;
 
@@ -37,11 +40,11 @@ public class BayesSpamFilter {
 
     }
 
-    private static double calcPajassAlgo(ArrayList<String> wordsInMail, HashMap<String, WordModel> wordList) {
+    private static double calcBayesAlgo(ArrayList<String> wordsInMail, HashMap<String, WordModel> wordList) {
         double hamProbability  = 1.0d;
         double spamProbability = 1.0d;
 
-        // Liste mit den 10 signifikantesten Wörtern (Das heisst, die wörter die am stärksten spam oder ham signalisieren)
+        // Liste mit den 10 signifikantesten Wörtern (Das heisst, die Wörter die am stärksten Spam oder Ham signalisieren)
         HashMap<String, Double> wordSignificances = new HashMap<>();
 
         for (String word: wordsInMail) {

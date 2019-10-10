@@ -1,5 +1,9 @@
 package ch.fhnw.dist;
 
+/**
+ * Model für ein Wort. Anzahl Vorkommen und die Wahrscheinlichkeit in Ham und Spam werden gespeichert.
+ */
+
 class WordModel
 {
     private int    SpamAmount = 0;

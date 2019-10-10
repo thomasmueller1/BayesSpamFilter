@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**
+ * Anlernen des Filters
+ */
+
 class FilterEducation {
     private HashMap<String, WordModel> resultsNumMails;
 
