@@ -124,7 +124,7 @@ class FilterHelper {
                     significance = wordModel.getSpamProbability() / wordModel.getHamProbability();
                 }
 
-                if(wordSignificances.size() < 9) {
+                if(wordSignificances.size() < 10) {
                     wordSignificances.put(word, significance);
                     continue;
                 }
