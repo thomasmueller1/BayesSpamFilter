@@ -16,7 +16,8 @@ public class BayesSpamFilter {
 
         /* Allgemeine Infos ausgeben */
         System.out.println("Schwellwert: " + CONFIG.SPAM_THRESHOLD);
-        System.out.println("Alpha Wert:  " + CONFIG.PROBABILITY_ON_ZEROMAILS + "\n");
+        System.out.println("Alpha Wert:  " + CONFIG.PROBABILITY_ON_ZEROMAILS);
+        System.out.println("Anz. Wörter: " + CONFIG.NUM_SIGNIFICANT_WORDS + " (Signifikanteste Wörter für Spam Erkennung)\n");
 
         /* Resultate ausgeben */
         System.out.println("HAM Testmails Erkennungsraten:");
