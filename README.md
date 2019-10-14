@@ -11,5 +11,5 @@ BayesSpamFilter for Module Dist an der FHNW
 
 ## Bedienung
 - Die Zip files werden in den Resourcen mitgeliefert
-- Die Zip Files werden nach (C:\\temp) unzipt für die weitere Verarbeitung
+- Die Zip Files werden nach (C:\\\\temp) unzipt für die weitere Verarbeitung
 - Am Schluss werden die Resultate auf der Konsole ausgegeben
