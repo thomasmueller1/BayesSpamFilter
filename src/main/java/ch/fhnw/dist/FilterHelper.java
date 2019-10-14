@@ -29,6 +29,9 @@ class FilterHelper {
         File fileHAM = new File(tempDirHAM);
         File fileSPAM = new File(tempDirSPAM);
 
+        fileHAM.mkdirs();
+        fileSPAM.mkdirs();
+
         fh.unzip(zipHAM, tempDirHAM);
         fh.unzip(zipSPAM, tempDirSPAM);
 
